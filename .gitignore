@@ -1,0 +1,9 @@
+.env
+.streamlit/secrets.toml
+environment.yml
+conda_explicit.txt
+requirements_manual.txt
+requirements.txt
+demo_text.txt
+detect_packages.py
+__pycache__/
