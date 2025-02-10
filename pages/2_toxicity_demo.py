@@ -1,11 +1,8 @@
 import streamlit as st
 from st_files_connection import FilesConnection
 from json import JSONDecodeError
-
 from utils import get_files
-
-import os                                                                                                                                                                                                          
-from dotenv import load_dotenv, find_dotenv
+import os                                                                                                                                                                                                  
 from pathlib import Path
 
 import numpy as np
@@ -13,10 +10,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter
 import seaborn as sns
+# from sklearn.metrics import roc_auc_score
+
 import re
 from collections import Counter
 import nltk
 from nltk.corpus import stopwords
+
+from detoxify import Detoxify
 
 st.set_page_config(page_title="Toxicity Demo", page_icon=":exclamation:")
 st.markdown("# :exclamation: Toxicity Demo")
@@ -104,8 +105,38 @@ clean_df = clean_data(df)
 text_col_name = st.text_input('Name of the column with text is', 'text')
 processed_df = clean_df[text_col_name].apply(lambda x: process_text(x))
 
+# Calculate sample size.
+population = processed_df.shape[0]
+z_score = 1.96 # for 95% confidence level
+st_dev = 0.5
+margin_of_error = 0.05
+numerator = (z_score**2 * st_dev * (1 - st_dev)) / margin_of_error**2
+denominator = 1 + ((z_score**2 * st_dev * (1 - st_dev)) / (margin_of_error**2 * population))
+sample_size = round(numerator/denominator)
 
+sample_df = processed_df.sample(n=sample_size, random_state=42)
+st.dataframe(sample_df.head())
 
+text_list = sample_df.values.tolist()
+
+# Toxicity prediction 
+results = Detoxify('original').predict(text_list)
+results_df = pd.DataFrame(results, index=text_list).round(5)
+st.dataframe(results_df)
+
+# Toxicity classification
+bool_results_df = results_df.loc[results_df["toxicity"] >= 0.5]
+
+n_results = bool_results_df.shape[0]
+per_sample_with_toxic = round(n_results/sample_size*100,2)
+
+st.markdown(
+    f"The dataset contains :blue[{population}] records. "
+    f"Using the sample size calculator, a total of :blue[{sample_size}] records were sampled. "
+    f"The sampled dataset contains :blue[{n_results}] text records that were classified as toxic. "
+    f":blue[{n_results}] sample records included PII, which means "
+    f":blue[{per_sample_with_toxic}]percentage of the sample dataset contains PII. "
+)
 
 # from cleanlab_studio import Studio
 
