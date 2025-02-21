@@ -23,10 +23,7 @@ st.set_page_config(page_title="Toxicity Demo", page_icon=":exclamation:")
 st.markdown("# :exclamation: Toxicity Demo")
 st.write(
     """
-    
-    The data sets can be found at [HuggingFace](https://huggingface.co/datasets).
-    
-    You can check out the original [HF data set explorer app repo](https://github.com/streamlit/files-connection/tree/main/hf-example)..
+    unbiased-toxic-roberta model trained on datsets by Unitary was used for toxicity classification.
     """
 )
 
@@ -133,9 +130,8 @@ per_sample_with_toxic = round(n_results/sample_size*100,2)
 st.markdown(
     f"The dataset contains :blue[{population}] records. "
     f"Using the sample size calculator, a total of :blue[{sample_size}] records were sampled. "
-    f"The sampled dataset contains :blue[{n_results}] text records that were classified as toxic. "
-    f":blue[{n_results}] sample records included PII, which means "
-    f":blue[{per_sample_with_toxic}]percentage of the sample dataset contains PII. "
+    f"The sampled dataset contains :blue[{n_results}] text records, :blue[{per_sample_with_toxic}]percentage of the sample dataset, "
+    f"that were classified as toxic. "
 )
 
 # from cleanlab_studio import Studio
