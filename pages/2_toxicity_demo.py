@@ -1,7 +1,7 @@
 import streamlit as st
 from st_files_connection import FilesConnection
 from json import JSONDecodeError
-from utils import get_files
+from utils import get_files, clean_data, process_text, find_match_count
 import os                                                                                                                                                                                                  
 from pathlib import Path
 
@@ -85,18 +85,6 @@ except JSONDecodeError as e:
         raise e
 
 st.dataframe(df.head(nrows), use_container_width=True)
-
-def clean_data(data):
-    clean_data = data.dropna()
-    return clean_data
-
-def process_text(input_text):
-    lowercase = input_text.lower() # lowercase
-    replaced = re.sub(r'[^\w\s]', ' ', lowercase)  # remove any special characters
-    return replaced
-
-def find_match_count(text: str, pattern: str) -> int:
-    return len(re.findall(r'\b' + pattern + r'\b', text))
 
 clean_df = clean_data(df)
 text_col_name = st.text_input('Name of the column with text is', 'text')

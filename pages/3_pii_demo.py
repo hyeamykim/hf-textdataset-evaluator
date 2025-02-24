@@ -18,7 +18,7 @@ import streamlit as st
 from st_files_connection import FilesConnection
 from streamlit_tags import st_tags
 
-from utils import get_files
+from utils import get_files, clean_data, process_text, find_match_count
 from presidio_helpers import (
     get_supported_entities,
     batch_analyzer_engine,
@@ -136,18 +136,6 @@ except JSONDecodeError as e:
         raise e
 
 st.dataframe(df.head(nrows), use_container_width=True)
-
-def clean_data(data):
-    clean_data = data.dropna()
-    return clean_data
-
-def process_text(input_text):
-    lowercase = input_text.lower() # lowercase
-    replaced = re.sub(r'[^\w\s]', ' ', lowercase)  # remove any special characters
-    return replaced
-
-def find_match_count(text: str, pattern: str) -> int:
-    return len(re.findall(r'\b' + pattern + r'\b', text))
 
 clean_df = clean_data(df)
 processed_df = clean_df.copy()

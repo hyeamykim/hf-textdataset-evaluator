@@ -28,5 +28,8 @@ def process_text(input_text):
     replaced = re.sub(r'[^\w\s]', ' ', lowercase)  # remove any special characters
     return replaced
 
+# def find_match_count(text: str, pattern: str) -> int:
+#     return len(re.findall(pattern, text))
+
 def find_match_count(text: str, pattern: str) -> int:
-    return len(re.findall(pattern, text))
+    return len(re.findall(r'\b' + pattern + r'\b', text))
