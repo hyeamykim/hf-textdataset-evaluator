@@ -7,23 +7,17 @@ from utils import get_files, clean_data, process_text, find_match_count
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.ticker import PercentFormatter
-import seaborn as sns
-import re
-from collections import Counter
-import nltk
-from nltk.corpus import stopwords
 
 st.set_page_config(page_title="Gender Bias Demo", page_icon=":female_sign:")
 st.markdown("# :female_sign: Gender Bias Demo")
-st.write(
+st.info(
     """
-    This demo shows how many times gender definitional words such as he and she appear in 
-    HF data sets in the gender statistics page.
-    
-    The data sets can be found at [HuggingFace](https://huggingface.co/datasets).
-    
-    You can check out the original [HF data set explorer app repo](https://github.com/streamlit/files-connection/tree/main/hf-example)..
+    - This demo is built on top of the [HF data set explorer app](https://github.com/streamlit/files-connection/tree/main/hf-example).
+    - The gender magnitude metric devised by [Rekabsaz & Schedl(2020)](https://arxiv.org/abs/2005.00372)
+    was used to test if there is gender imabalance in a given text. 
+    - The gender definitional words used to calculate the metric can be personalized. 
+    - It also shows how many times gender definitional words such as he and she appeared
+     and how they are distributed in the dataset.
     """
 )
 
@@ -41,6 +35,8 @@ with st.expander('Find dataset examples'):
         "argilla/news-summary",
         "stanfordnlp/SHP",
         "HuggingFaceM4/tmp-pmd-synthetic-testing",
+        "HuggingFaceFW/fineweb",
+        "SetFit/bbc-news"
     ]
     st.selectbox("Examples", dataset_examples, key="_dataset", on_change=set_dataset)
     """
@@ -48,22 +44,24 @@ with st.expander('Find dataset examples'):
         This repo supports data sets with data stored in json, jsonl, csv or parquet format.
     """
 
-# Enter a dataset and retrieve a list of data files
-#dataset_name = st.text_input("Enter your dataset of interest", key='dataset')
-#dataset = Path('datasets', dataset_name)
-dataset = Path('datasets',st.session_state.dataset)
-dataset = dataset.as_posix()
-file_names = get_files(conn, dataset)
+    # Enter a dataset and retrieve a list of data files
+    dataset_name = st.text_input("Enter your dataset of interest", key='dataset')
+    #dataset = Path('datasets', dataset_name)
+    dataset = Path('datasets',st.session_state.dataset)
+    dataset = dataset.as_posix()
+    file_names = get_files(conn, dataset)
 
-if not file_names:
-    st.warning(
-        "No compatible data files found. This app only supports datasets stored in csv, json[l] or parquet format.")
-    st.stop()
+    if not file_names:
+        st.warning(
+            "No compatible data files found. This app only supports datasets stored in csv, json[l] or parquet format.")
+        st.stop()
 
-# Select a data file and row count to retrieve
-file_selection = st.selectbox("Pick a data file", file_names)
-datafile = Path(dataset, file_selection)
-nrows = st.slider("Rows to retrieve", value=50)
+    # Select a data file and row count to retrieve
+    file_selection = st.selectbox("Pick a data file", file_names)
+    datafile = Path(dataset, file_selection)
+    nrows = st.slider("Rows to retrieve", value=50)
+
+    text_col_name = st.text_input('Name of the column with text is', 'text')
 
 "## Dataset Preview"
 #kwargs = dict(nrows=nrows, ttl=3600)
@@ -86,9 +84,20 @@ except JSONDecodeError as e:
 
 st.dataframe(df.head(nrows), use_container_width=True)
 
-clean_df = clean_data(df)
-text_col_name = st.text_input('Name of the column with text is', 'text')
+clean_df = clean_data(df, text_col_name)
+processed_df = clean_df.copy()
 processed_df = clean_df[text_col_name].apply(lambda x: process_text(x))
+
+# Calculate sample size.
+population = processed_df.shape[0]
+z_score = 1.96 # for 95% confidence level
+st_dev = 0.5
+margin_of_error = 0.05
+numerator = (z_score**2 * st_dev * (1 - st_dev)) / margin_of_error**2
+denominator = 1 + ((z_score**2 * st_dev * (1 - st_dev)) / (margin_of_error**2 * population))
+sample_size = round(numerator/denominator)
+
+sample_df = processed_df.sample(n=sample_size, random_state=42)
 
 gender_definitional_pairs = np.array([['he', 'she'],
                                         ['man', 'woman'],
@@ -142,7 +151,8 @@ gender_words = st.multiselect(
 new_element = st.text_input('Add new gender-definitional words:', '')
 gender_words.append(new_element)
 
-copy_df = pd.DataFrame(processed_df, columns=[text_col_name])
+# copy_df = pd.DataFrame(processed_df, columns=[text_col_name])
+copy_df = pd.DataFrame(sample_df, columns=[text_col_name])
 
 for col in gender_words:
     if col != '':
@@ -191,8 +201,6 @@ def get_bias(tokens):
 tokens_df = copy_df[text_col_name].to_frame()
 tokens_df['tokens'] = tokens_df[text_col_name].apply(get_tokens)
 tokens_df.drop(columns = text_col_name, inplace=True)
-
-
 tokens_df[['bias_tc', 'bias_tf', 'bias_bool']] = pd.DataFrame(tokens_df['tokens'].apply(get_bias).tolist(), index=tokens_df.index)
 
 
@@ -213,7 +221,9 @@ diff_bias_values = [t[met_option_dict[met_option]] for t in bias_col]
 mean_bias = round(np.mean(diff_bias_values),2)
 
 st.markdown(
-    f"The dataset contains a total of :blue[{n_gender_words}] gender-definitional words. "
+    f"The dataset contains :blue[{population}] records. "
+    f"Using the sample size calculator, a total of :blue[{sample_size}] records were sampled. "
+    f"The sampled dataset contains a total of :blue[{n_gender_words}] gender-definitional words. "
     f"The most frequently appearing gender word is :blue[{top_gender_word}], "
     f"which appeared :blue[{n_top_gender_word}] times. " 
     f"The female associated words appeared :blue[{n_female_words}] times and "

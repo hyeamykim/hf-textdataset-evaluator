@@ -19,8 +19,9 @@ def load_data():
     data.rename(lowercase, axis='columns', inplace=True)
     return data
 
-def clean_data(data):
-    clean_data = data.dropna()
+@st.cache_data(persist=True)
+def clean_data(data, text_col_name):
+    clean_data = data.dropna(subset=text_col_name)
     return clean_data
 
 def process_text(input_text):

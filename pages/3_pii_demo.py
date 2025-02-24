@@ -2,23 +2,15 @@
 import logging
 import os
 from pathlib import Path # is this causing a problem?
-
-import pandas as pd
 from json import JSONDecodeError
-import re
-# import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
-# from matplotlib.ticker import PercentFormatter
-# import seaborn as sns
-# from collections import Counter
-# import nltk
-# from nltk.corpus import stopwords
 
 import streamlit as st
 from st_files_connection import FilesConnection
 from streamlit_tags import st_tags
 
-from utils import get_files, clean_data, process_text, find_match_count
+from utils import get_files, clean_data, process_text
 from presidio_helpers import (
     get_supported_entities,
     batch_analyzer_engine,
@@ -36,7 +28,6 @@ st.set_page_config(
 )
 
 logger = logging.getLogger("presidio-streamlit")
-
 allow_other_models = os.getenv("ALLOW_OTHER_MODELS", False)
 
 # Main panel
@@ -45,36 +36,17 @@ st.header(
     :id: PII Detection with [Microsoft Presidio](https://microsoft.github.io/presidio/)
     """
 )
-
-with st.expander("About this demo", expanded=False):
-    st.info(
-        """Presidio is an open source customizable framework for PII detection and de-identification.
-        \n\n[Code](https://aka.ms/presidio) | 
-        [Tutorial](https://microsoft.github.io/presidio/tutorial/) | 
-        [Installation](https://microsoft.github.io/presidio/installation/) | 
-        [FAQ](https://microsoft.github.io/presidio/faq/) |
-        [Feedback](https://forms.office.com/r/9ufyYjfDaY) |"""
-    )
-
-    st.info(
-        """
-    Use this demo to:
-    - Experiment with different off-the-shelf models and NLP packages.
-    - Explore the different de-identification options, including redaction, masking, encryption and more.
-    - Generate synthetic text with Microsoft Presidio and OpenAI.
-    - Configure allow and deny lists.
-    
-    This demo website shows some of Presidio's capabilities.
-    [Visit our website](https://microsoft.github.io/presidio) for more info,
-    samples and deployment options.    
+st.info(
+    """ 
+    - This demo is built with [Microsoft Presidio App](https://huggingface.co/spaces/presidio/presidio_demo)
+    to detect Personally Identifiable Information (PII) in a given text.
+    - With the example HF text dataset or the dataset of your own choice, you can get an idea of how much
+    PII is contained in the dataset.
+    - You can choose between spacy and HF NER models for PII detection and personalize which PII identity types
+    should be included.
     """
-    )
+)
 
-    st.markdown(
-        "[![Pypi Downloads](https://img.shields.io/pypi/dm/presidio-analyzer.svg)](https://img.shields.io/pypi/dm/presidio-analyzer.svg)"  # noqa
-        "[![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)"
-        "![GitHub Repo stars](https://img.shields.io/github/stars/microsoft/presidio?style=social)"
-    )
 
 conn = st.experimental_connection('hf', type=FilesConnection)
 
@@ -90,6 +62,8 @@ with st.expander('Find dataset examples'):
         "argilla/news-summary",
         "stanfordnlp/SHP",
         "HuggingFaceM4/tmp-pmd-synthetic-testing",
+        "HuggingFaceFW/fineweb",
+        "SetFit/bbc-news"
     ]
     st.selectbox("Examples", dataset_examples, key="_dataset", on_change=set_dataset)
     """
@@ -98,7 +72,7 @@ with st.expander('Find dataset examples'):
     """
 
     # Enter a dataset and retrieve a list of data files
-    # dataset_name = st.text_input("Enter your dataset of interest", key='dataset')
+    dataset_name = st.text_input("Enter your dataset of interest", key='dataset')
     #dataset = Path('datasets', dataset_name)
     dataset = Path('datasets', st.session_state.dataset)
     dataset = dataset.as_posix()
@@ -137,7 +111,7 @@ except JSONDecodeError as e:
 
 st.dataframe(df.head(nrows), use_container_width=True)
 
-clean_df = clean_data(df)
+clean_df = clean_data(df, text_col_name)
 processed_df = clean_df.copy()
 processed_df[text_col_name] = clean_df[text_col_name].apply(lambda x: process_text(x))
 
@@ -287,7 +261,7 @@ results_df['identity'] = results_df.apply(
     lambda row: row['text'][row['start']:row['end']] if 0 <= row['start'] < len(row['text']) and 0 <= row['end'] <= len(row['text']) else '', 
     axis=1
 )
-st.dataframe(results_df.head())
+# st.dataframe(results_df.head())
 
 count_df = results_df['entity_type'].value_counts()
 # st.dataframe(count_df)
