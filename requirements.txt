@@ -1,0 +1,12 @@
+detoxify==0.5.2
+matplotlib==3.10.0
+nltk==3.9.1
+numpy==1.25.0
+pandas==2.2.3
+presidio_analyzer==2.2.357
+presidio_anonymizer==2.2.357
+spacy==3.8.3
+st_annotated_text==4.0.1
+st_files_connection==0.1.0
+streamlit==1.26.0
+streamlit_tags==1.2.8
