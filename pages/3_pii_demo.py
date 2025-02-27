@@ -1,7 +1,7 @@
 """Streamlit app for Presidio."""
 import logging
 import os
-from pathlib import Path # is this causing a problem?
+from pathlib import Path 
 from json import JSONDecodeError
 import pandas as pd
 import matplotlib.pyplot as plt

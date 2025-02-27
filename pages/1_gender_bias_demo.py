@@ -9,7 +9,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from collections import Counter
 
-
 st.set_page_config(page_title="Gender Bias Demo", page_icon=":female_sign:")
 st.markdown("# :female_sign: Gender Bias Demo")
 st.info(
