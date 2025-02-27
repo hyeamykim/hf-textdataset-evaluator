@@ -1,6 +1,6 @@
 
 import streamlit as st
-from st_files_connection import FilesConnection
+# from st_files_connection import FilesConnection
 from json import JSONDecodeError
 from pathlib import Path
 from utils import get_files, clean_data, process_text, find_match_count
@@ -234,7 +234,7 @@ st.markdown(
 )
 
 with st.expander("Check which gender-definitional words were detected"):
-    
+
     fig, ax = plt.subplots(figsize=(6, 4))
     gender_counts.sort_values(by='count').plot.barh(ax=ax)
     ax.set_title("Most Frequently used Gender-definitional Words in the Dataset")

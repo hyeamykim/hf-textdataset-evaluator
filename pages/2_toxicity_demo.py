@@ -1,5 +1,5 @@
 import streamlit as st
-from st_files_connection import FilesConnection
+# from st_files_connection import FilesConnection
 from json import JSONDecodeError
 from utils import get_files, clean_data, process_text
 import os                                                                                                                                                                                                  

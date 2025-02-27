@@ -7,7 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 import streamlit as st
-from st_files_connection import FilesConnection
+# from st_files_connection import FilesConnection
 from streamlit_tags import st_tags
 
 from utils import get_files, clean_data, process_text
