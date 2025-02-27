@@ -21,14 +21,18 @@ Though gender bias can have varying definitions, in the context of this app, it 
 Specifically, gender magnitude of the dataset was defined using a set of pre-determined gender definitional words (e.g., she, woman, her, he, man, him, etc.) to quantify the degree of female-/male-related concepts. The pre-determined set of gender definitional words, as appeaered in the study, is provided in the app, but it can also be edited. The study used the term frequency(TF) of the words and the boolean value of whether the word exists in the dataset for calculating the gender magnitude. For example, the female magnitude of a dataset is defined as follows:
 
 **TF**: 
-$$mag^f(d) = \sum_{w \in G_f} \log \#(w, d)$$
+```math
+mag^f(d) = \sum_{w \in G_f} \log \#(w, d)
+```
 
 **Boolean**: 
-$$mag^f(d) =
+```math
+mag^f(d) =
 \begin{cases}
 1, & \text{if } \sum_{w \in G_f} \#(w, d) > 0 \\
 0, & \text{otherwise}
-\end{cases}$$
+\end{cases}
+```
 
 In the app, three options of calculating gender magnitude with total count, term frequency, and boolean values are offered. Final gender magnitude can be reported by male, female, or difference (female - male) metrics. 
 Negative values in difference metric suggests gender imbalance in preference to the male concept in the dataset, and positive values vice versa.  
