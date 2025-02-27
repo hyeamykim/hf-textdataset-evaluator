@@ -21,18 +21,14 @@ Though gender bias can have varying definitions, in the context of this app, it 
 Specifically, gender magnitude of the dataset was defined using a set of pre-determined gender definitional words (e.g., she, woman, her, he, man, him, etc.) to quantify the degree of female-/male-related concepts. The pre-determined set of gender definitional words, as appeaered in the study, is provided in the app, but it can also be edited. The study used the term frequency(TF) of the words and the boolean value of whether the word exists in the dataset for calculating the gender magnitude. For example, the female magnitude of a dataset is defined as follows:
 
 **TF**: 
-$$
-mag^f(d) = \sum_{w \in G_f} \log \#(w, d)
-$$
+$$mag^f(d) = \sum_{w \in G_f} \log \#(w, d)$$
 
 **Boolean**: 
-$$ 
-mag^f(d) =
+$$mag^f(d) =
 \begin{cases}
 1, & \text{if } \sum_{w \in G_f} \#(w, d) > 0 \\
 0, & \text{otherwise}
-\end{cases}
-$$
+\end{cases}$$
 
 In the app, three options of calculating gender magnitude with total count, term frequency, and boolean values are offered. Final gender magnitude can be reported by male, female, or difference (female - male) metrics. 
 Negative values in difference metric suggests gender imbalance in preference to the male concept in the dataset, and positive values vice versa.  
@@ -48,11 +44,11 @@ In the app, each text was scored on the following labels for toxicity (toxic, se
 
 Text dataset collected from documents, e-mails, chats, and social media platforms, etc, can contain private information, which might lead to a person's identification  or further potential harm [11]. Specifically, Personal Identifiable Information(PII) refers to any information that could show the identity of an individual, such as phone number, email address, IP address, and ZIP code. Exposing or sharing such sensitive information to a third party without the individual’s consent could lead to serious consequences, especially with the GDPR regulations, for the companies that operate in the European Union. Therefore, this app offers a way to check for PII in text using Microsoft Presidio [12], an open-source PII detection tool based on pattern detection and ML models. HuggingFace already offers this feature on the Dataset Hub, but this app helps check for PII information on any HuggingFace text datasets where it is not applied. 
 
-This demo is built based on the Presidio Streamlit app [13] and offers options on Named Entity Recognition (NER) models from Spacy or HuggingFace. The specific PII categories can also be customized with allow- and deny- list. 
+This demo is built based on the Presidio Streamlit app [13] and offers options on Named Entity Recognition (NER) models from Spacy or HuggingFace. The specific PII categories that should be detected can be customized. 
 
 ## Demo App
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://llm-examples.streamlit.app/)
+<!-- [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://llm-examples.streamlit.app/) -->
 
 
 ## References

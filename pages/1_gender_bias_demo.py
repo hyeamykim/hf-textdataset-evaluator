@@ -7,6 +7,8 @@ from utils import get_files, clean_data, process_text, find_match_count
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from collections import Counter
+
 
 st.set_page_config(page_title="Gender Bias Demo", page_icon=":female_sign:")
 st.markdown("# :female_sign: Gender Bias Demo")
@@ -231,28 +233,30 @@ st.markdown(
     f"The gender magnitude({met_option}) of the dataset is :blue[{mean_bias}]."
 )
 
-fig, ax = plt.subplots(figsize=(6, 4))
-gender_counts.sort_values(by='count').plot.barh(ax=ax)
-ax.set_title("Most Frequently used Gender-definitional Words in the Dataset")
-st.pyplot(fig)
-
-bins = 10
-fig, ax = plt.subplots(figsize=(5,4))
-ax.hist(copy_df['female_count'], bins, alpha=0.5, label='female')
-ax.hist(copy_df['male_count'], bins, alpha=0.5, label='male')
-ax.legend(loc='upper right')
-ax.set_title('Histogram of Male- and Female-definitional Words in the Dataset')
-st.pyplot(fig)
-
-specific_options = st.multiselect(
-    'If you want to check the distribution of specific gender words, choose from below.',
-    gender_words_list,
-    ['he','she'])
-
-if len(specific_options)!=0:
-    fig, axs = plt.subplots()
-    for idx, w in enumerate(specific_options):
-        axs.hist(copy_df[w], bins, alpha=0.5, label=w)
-    axs.legend(loc='upper right')
-    axs.set_title(f'Histogram of {specific_options} in the data set')
+with st.expander("Check which gender-definitional words were detected"):
+    
+    fig, ax = plt.subplots(figsize=(6, 4))
+    gender_counts.sort_values(by='count').plot.barh(ax=ax)
+    ax.set_title("Most Frequently used Gender-definitional Words in the Dataset")
     st.pyplot(fig)
+
+    bins = 10
+    fig, ax = plt.subplots(figsize=(5,4))
+    ax.hist(copy_df['female_count'], bins, alpha=0.5, label='female')
+    ax.hist(copy_df['male_count'], bins, alpha=0.5, label='male')
+    ax.legend(loc='upper right')
+    ax.set_title('Histogram of Male- and Female-definitional Words in the Dataset')
+    st.pyplot(fig)
+
+    specific_options = st.multiselect(
+        'If you want to check the distribution of specific gender words, choose from below.',
+        gender_words_list,
+        ['he','she'])
+
+    if len(specific_options)!=0:
+        fig, axs = plt.subplots()
+        for idx, w in enumerate(specific_options):
+            axs.hist(copy_df[w], bins, alpha=0.5, label=w)
+        axs.legend(loc='upper right')
+        axs.set_title(f'Histogram of {specific_options} in the data set')
+        st.pyplot(fig)

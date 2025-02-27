@@ -47,7 +47,6 @@ st.info(
     """
 )
 
-
 conn = st.experimental_connection('hf', type=FilesConnection)
 
 with st.expander('Find dataset examples'):
@@ -174,25 +173,25 @@ st_return_decision_process = st.checkbox(
 )
 
 # Allow and deny lists
-st_deny_allow_expander = st.expander(
-    "Allowlists and denylists",
-    expanded=False,
-)
+# st_deny_allow_expander = st.expander(
+#     "Allowlists and denylists",
+#     expanded=False,
+# )
 
-with st_deny_allow_expander:
-    st_allow_list = st_tags(
-        label="Add words to the allowlist", text="Enter word and press enter."
-    )
-    st.caption(
-        "Allowlists contain words that are not considered PII, but are detected as such."
-    )
+# with st_deny_allow_expander:
+#     st_allow_list = st_tags(
+#         label="Add words to the allowlist", text="Enter word and press enter."
+#     )
+#     st.caption(
+#         "Allowlists contain words that are not considered PII, but are detected as such."
+#     )
 
-    st_deny_list = st_tags(
-        label="Add words to the denylist", text="Enter word and press enter."
-    )
-    st.caption(
-        "Denylists contain words that are considered PII, but are not detected as such."
-    )
+#     st_deny_list = st_tags(
+#         label="Add words to the denylist", text="Enter word and press enter."
+#     )
+#     st.caption(
+#         "Denylists contain words that are considered PII, but are not detected as such."
+#     )
 
 st_entities_expander = st.expander("Choose entities to look for")
 st_entities = st_entities_expander.multiselect(
@@ -213,12 +212,11 @@ numerator = (z_score**2 * st_dev * (1 - st_dev)) / margin_of_error**2
 denominator = 1 + ((z_score**2 * st_dev * (1 - st_dev)) / (margin_of_error**2 * population))
 sample_size = round(numerator/denominator)
 
+# Prepare a sample
 sample_df = clean_df.sample(n=sample_size, random_state=42)
-# st.dataframe(sample_df.head())
-
 sample_indices = sample_df.index
 text_list = sample_df[text_col_name].values.tolist()
-df_dict = sample_df.to_dict(orient="list")
+# df_dict = sample_df.to_dict(orient="list")
 
 # Batch analyze
 batch_analyzer_load_state = st.info("Starting Presidio analyzer...")
@@ -253,26 +251,16 @@ flatten_results = list(map(lambda x, y:{**x, K:y}, flatten_results, index_list))
 
 # Show the batch analyzer result as dataframe.
 flatten_df = pd.DataFrame(flatten_results)
-# st.dataframe(flatten_df.head())
-
 flatten_df = flatten_df.set_index('index_num')
 results_df = pd.merge(flatten_df, sample_df, left_index=True, right_index=True)
 results_df['identity'] = results_df.apply(
     lambda row: row['text'][row['start']:row['end']] if 0 <= row['start'] < len(row['text']) and 0 <= row['end'] <= len(row['text']) else '', 
     axis=1
 )
-# st.dataframe(results_df.head())
 
+# Sort the detected PII entity types and identities
 count_df = results_df['entity_type'].value_counts()
-# st.dataframe(count_df)
-
 name_df = results_df['identity'].value_counts()
-# st.dataframe(name_df)
-
-fig, ax = plt.subplots(figsize=(6, 4))
-count_df.sort_values().plot.barh(ax=ax)
-ax.set_title("Most Frequently Detected PII Entity Types in the Dataset")
-st.pyplot(fig)
 
 n_pii = count_df.sum()
 top_pii_type = count_df.index[0]
@@ -290,39 +278,18 @@ st.markdown(
     f":blue[{per_sample_with_pii}]percentage of the sample dataset contains PII. "
 )
 
-# bins = 10
-# fig, ax = plt.subplots(figsize=(5,4))
-# ax.hist(results_df['identity'], bins, alpha=0.5, label='identity')
-# ax.legend(loc='upper right')
-# ax.set_title('Histogram of detected PII words in the Dataset')
-# st.pyplot(fig)
+with st.expander("Check which PII entity types and identities were detected"):
 
-# batch_df = pd.DataFrame.from_records(st_batch_analyze_results)
-# batch_df.assign(combined=batch_df.agg(list, axis=1))
-# batch_df['combined'] = batch_df[batch_df.columns[0:]].apply(
-#     lambda x: x.dropna().to_dict(),
-#     axis=1
-# )
-# dict_df = pd.DataFrame.from_dict(batch_df['combined'])
-# st.dataframe(dict_df.head())
+    fig, ax = plt.subplots(figsize=(3, 2))
+    count_df.sort_values().plot.barh(ax=ax)
+    ax.set_title("Most Frequently Detected PII Entity Types in the Dataset")
+    st.pyplot(fig)
+
+    fig, ax = plt.subplots(figsize=(3, 2))
+    name_df.iloc[:10].sort_values().plot.barh(ax=ax)
+    ax.set_title("Most Frequently Detected PII Entity Types in the Dataset")
+    st.pyplot(fig)
 
 
-# batch_df.drop(columns=['combined'], inplace=True)
-# batch_df.stack(future_stack=True).droplevel(-1).reset_index(name='analyzer results')
-# st.dataframe(batch_df.head())
-
-# batch_df = pd.DataFrame.from_records(st_batch_analyze_results)
-# out_df = batch_df.stack().droplevel(-1).reset_index(name='analyzer results')
-
-# batch_df = pd.DataFrame.from_records([r.to_dict() for r in st_batch_analyze_results])
-# batch_df["text"] = [st_text[res.start : res.end] for res in st_analyze_results]
-
-# results_df = processed_df.copy()
-# results_df['analyer results'] = st_batch_analyzer_results
-# results_df = pd.DataFrame({'analyzer results': st_batch_analyze_results})
-# st.dataframe(results_df.head(), use_container_width=True)
-
-# results_df = pd.DataFrame({'analyzer results': flatten_results})
-# st.dataframe(results_df.head(), use_container_width=True)
 
 
